@@ -1,3 +1,6 @@
-#log files
+# log files
 logs/
 *.log
+
+# dataset
+dataset/
