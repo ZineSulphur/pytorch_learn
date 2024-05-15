@@ -3,7 +3,7 @@ logs/
 *.log
 
 # dataset
-dataset/
+data/
 
 # vscode
 .vscode
