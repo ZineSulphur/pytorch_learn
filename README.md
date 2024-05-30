@@ -9,4 +9,3 @@
 * autograd.ipynb - torch.autograd相关学习笔记
 * tensor.ipynb - torch.tensor相关学习笔记
 * cnn - 卷积神经网络相关练习项目代码
-* myautograd - 自己实现自动微分
