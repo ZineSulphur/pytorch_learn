@@ -9,8 +9,8 @@ from torch.utils.tensorboard import SummaryWriter
 from cifar10_model import ImgRecNN
 
 # 准备数据集
-train_data = torchvision.datasets.CIFAR10(root='../data', train=True, transform=torchvision.transforms.ToTensor(), download=True)
-test_data = torchvision.datasets.CIFAR10(root='../data', train=False, transform=torchvision.transforms.ToTensor(), download=True)
+train_data = torchvision.datasets.CIFAR10(root='./data', train=True, transform=torchvision.transforms.ToTensor(), download=True)
+test_data = torchvision.datasets.CIFAR10(root='./data', train=False, transform=torchvision.transforms.ToTensor(), download=True)
 
 train_data_size = len(train_data)
 test_data_size = len(test_data)
@@ -38,7 +38,7 @@ total_test_step = 0
 epoch = 10
 
 # tensorboard
-writer = SummaryWriter("../logs")
+writer = SummaryWriter("./logs")
 
 
 for i in range(epoch):
