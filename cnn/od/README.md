@@ -47,3 +47,5 @@
 ## 参考文章
 
 [目标检测简介](https://blog.csdn.net/qq_31463571/article/details/134692319)
+
+[44 物体检测算法：R-CNN，SSD，YOLO【动手学深度学习v2】](https://www.bilibili.com/video/BV1Db4y1C71g)
