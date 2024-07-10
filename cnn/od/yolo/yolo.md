@@ -349,6 +349,45 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ***
 
+## YOLOv6
+
+论文[YOLOv6: A Single-Stage Object Detection Framework for Industrial Applications](https://arxiv.org/pdf/2209.02976)
+代码[https://github.com/meituan/YOLOv6/]
+
+### 网络结构
+
+![YOLOv6](./img/yolov6_1.png)
+
+- 统一设计了更高效的 Backbone 和 Neck ：受到硬件感知神经网络设计思想的启发，基于 RepVGG style设计了可重参数化、更高效的骨干网络 EfficientRep Backbone 和 Rep-PAN Neck。
+- 优化设计了更简洁有效的 Efficient Decoupled Head，在维持精度的同时，进一步降低了一般解耦头带来的额外延时开销。
+- 在训练策略上，我们采用Anchor-free 无锚范式，同时辅以 SimOTA标签分配策略以及 SIoU边界框回归损失来进一步提高检测精度。
+
+### 简述改进部分
+
+1. 输入端
+
+    无锚框
+
+2. 主干
+
+    YOLOv6的Backbone的实现的基本模块为RVB1_X结构，其全程为RepVGGBlock_X，表示由多个RepVGGBlock组成。
+
+    RepVGGBlock是RepVGG网络的重复模块，由多个RepVGGConv模块组成。每个RepVGGBlock由两个RepVGGConv模块组成，第一个RepVGGConv是一个3x3卷积操作，而第二个RepVGGConv是一个1x1卷积操作。
+
+    这两个卷积模块之间使用了批归一BatchNorm）和ReLU激活函数。RepVGGConv模块是RepVGG网络中的基本卷积模块，由一个卷积层、批归一化和ReLU激活函数组成。这样的设计使得RepVGGBlock具有较强的表达能力，并且可以适应不同的特征提取需求。
+
+    epVGGBlock在RepVGG网络中被重复堆叠多次，形成了深层的网络结构。通过堆叠多个RepVGGBlock，可以提高网络的表示能力和复杂度，从而实现更准确的特征提取和目标识别。
+
+3. 颈部
+
+    PANet结构类似更换为RepVGGBlock结构
+
+4. 输出端
+
+    YOLOv6对检测头进行了解耦，分开了边框与类别的分类过程。
+
+***
+
 ## 参考文章和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
