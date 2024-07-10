@@ -184,6 +184,122 @@ $$Loss=\lambda_{coord}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[(x_i^j-\hat{x}_
 
 ***
 
+## YOLOv4
+
+论文[YOLOv4: Optimal Speed and Accuracy of Object Detection](https://arxiv.org/abs/2004.10934)
+
+### 模型结构
+
+![YOLOv4](./img/yolov4_1.jpg)
+
+- CBM：Yolov4网络结构中的最小组件，由Conv+Bn+Mish激活函数三者组成。
+- CBL：由Conv+Bn+Leaky_relu激活函数三者组成。
+- Res unit：借鉴Resnet网络中的残差结构，让网络可以构建的更深。
+- CSPX：借鉴CSPNet网络结构，由卷积层和X个Res unint模块Concate组成。
+- SPP：采用1×1，5×5，9×9，13×13的最大池化的方式，进行多尺度融合。
+
+YOLOv4=CSODarknet53(backbone)+SPP模块(neck)+PANet(neck)+YOLOv3head(head)
+
+![YOLOv4结构](./img/yolov4_2.png)
+
+### 改进部分
+
+作者分为了BOF和BOS两部分。
+
+Bag of freebies: 只增加训练成本，但是能显著提高精度，并不影响推理速度
+
+Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方法
+
+#### Bag of freebies
+
+- mosaic数据增强
+
+    将四张不同的训练图像随机拼接在一起，形成一张马赛克图像进行训练。这种方式可以帮助模型学习并适应不同的场景、目标形状和尺度变化。
+
+    ![YOLOv4Mosaic数据增强](./img/yolov4_4.png)
+
+- 数据增强
+  - Random Erase: 用随机值或训练集的平均像素值替换图像区域
+  - Hide and Seek: 根据概率设置随机隐藏一些patch
+  - 等等
+
+    ![YOLOv4数据增强](./img/yolov4_3.png)
+
+- 自对抗训练(Self-Adversarial Training,SAT)
+
+    SAT是一种自对抗训练数据增强方法，这一种新的对抗性训练方式。在第一阶段，神经网络改变原始图像而不改变网络权值。以这种方式，神经网络对自身进行对抗性攻击，改变原始图像，以制造图像上没有所需对象的欺骗。在第二阶段，用正常的方法训练神经网络去检测目标。
+
+- DropBlock
+
+    之前dropout随机选择点，现在随机选择一个区域
+
+    ![YOLOv4DropBlock](./img/yolov4_5.png)
+
+- Label Smoothing
+
+    将类别标签进行平衡如(cat,dog)=(1,0)->[1,0]x(1-0.1)+0.1/2=[0.05,0.95]
+
+    使用之后可以使簇内更紧密，簇间更分离。
+
+- 损失函数
+
+    ![IoU](./img/iou1.png)
+
+    ![GIoU](./img/iou2.png)
+
+    ![DIoU](./img/iou3.png)
+
+    ![CIoU](./img/iou4.png)
+
+#### Bag of specials
+
+- DIoU-NMS和Soft-NMS
+
+    之前采用NMS，选择采用DIoU-NMS，考虑Box中心点距离。
+
+    Soft-NMS则是更柔和的NMS，将之前会直接删除的框，变为修改分数即$s_i<-s_if(iou(M,b_i))$
+
+    $$s_i=\begin{cases}
+        s_i,IoU-R_{DIoU}(M,B_i)\lt\varepsilon \\
+        0,IoU-R_{DIoU}(M,B_i)\ge\varepsilon
+    \end{cases} R_{DIoU}=\frac{\rho^2(b,b^{gt})}{c^2}$$
+
+    M表示高置信度候选框，$B_i$是遍历各个框跟置信度高的框的重合情况
+
+- SPPNet(Spatial Pyramid Pooling)
+  - 增大感受野
+  - 使用最大池化满足最终输入特征一致
+
+- CSPNet(Cross Stage Partial Network)
+
+    CSPNet的主要目的是能够实现更丰富的梯度组合，同时减少计算量。
+
+    每个block按照特征图的channel分为两部分，一部分走正常网络，另一份直接concat到这个block的输出
+
+    ![CSPNet](./img/yolov4_6.png)
+
+- SAM(Spatial Attention Module)
+
+    作者在原SAM(Spatial Attention Module)方法上进行了修改，将SAM从空间注意修改为点注意。通过引入SAM模块，YOLOv4能够自适应地调整特征图的通道注意力权重。
+
+    ![SAM](./img/yolov4_7.png)
+
+- PAN(Path Aggregation Network)
+
+    YOLOv4引入了PAN（Path Aggregation Network）模块，用于在不同尺度的特征图之间进行信息传递和融合，以获取更好的多尺度特征表示。
+
+    ![PAN](./img/yolov4_9.png)
+
+    作者对原PAN(Path Aggregation Network)方法进行了修改, 使用张量连接(concat)代替了原来的快捷连接(shortcut connection)。
+
+    ![PAN2](./img/yolov4_8.png)
+
+- Mish激活函数
+
+    $$f(x)=x \cdot tanh(ln(1+e^x))$$
+
+***
+
 ## 参考文章和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
