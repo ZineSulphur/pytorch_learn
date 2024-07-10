@@ -56,11 +56,65 @@ R-CNN的主要性能瓶颈在于，对每个提议区域，卷积神经网络的
 Fast R-CNN 算法流程分三个步骤：
 - 一张图像生成1k～2k个候选区域（elective Search）
 - 将图像输入网络得到相应的特征图，将SS法生成的候选框投影到特征图上获得相应的特征矩阵
-- 将每个特征矩阵通过ROI pooling层缩放为7x7大小的特征图，接着将特征图展平通过一系列全连接层获得预测结果。
+- 将每个特征矩阵通过ROI pooling层缩放为统一尺寸7x7大小的特征图，接着将特征图展平通过一系列全连接层获得预测结果。
 
 ### Fast R-CNN结构
 
 ![FastRCNN结构](./img/fast-rcnn.svg)
+
+### 输入
+
+R-CNN依次将SS选择的提议区域的图片输入进行卷积。
+
+而Fast R-CNN将整张图片送入网络进行卷积，然后在网络提取出的特征图中提取候选区域，去除了R-CNN中反复提取特征的部分。
+
+### 兴趣区域汇聚层（RoI pooling）
+
+RoI（Region of Interest）是从原始图像中提取的区域。而RoI pooling则是将这些区域在特征图内对应部分抠出来，并且得到统一大小的特征图的过程。
+
+#### 输入
+
+1. 从具有多个卷积核池化的深度网络中获得的固定大小的feature maps。
+2. 一个表示所有 ROI 的 N*5 的矩阵，其中N表示ROI的数目。一列表示图像index，其余四列表示其余的左上角和右下角坐标。
+
+#### 输出
+
+输出是 batch 个 vector，其中 batch 的值等于 RoI 的个数，vector的大小为 channel ∗ w ∗ h。
+
+ROI Pooling 的过程就是将一个个大小不同的矩形框，都映射成大小为 w ∗ h的矩形框。
+
+#### 步骤
+
+1. 根据输入image，将 ROI 映射到 feature map 对应位置；
+2. 将映射后的区域划分为相同大小的 sections（sections数量与输出的维度相同）；
+3. 对每个 sections 进行 max pooling 操作；
+
+![roi1](./img/roi1.png)
+
+![roi2](./img/roi2.png)
+
+![roi3](./img/roi3.gif)
+
+### 输出
+
+分类器输出N+1个概率（N个类别+1个背景），回归器输出N+1个候选框回归参数$(d_x,d_y,d_w,d_h)$即(N+1)x4个。
+
+实际预测的框的参数$(g_x,g_y,g_w,g_h)$和参数$(d_x,d_y,d_w,d_h)$的对应关系为：
+
+$$g_x=p_wd_x+p_x \\ g_y=p_hd_y+p_y \\ g_w=p_we^{d_w} \\ g_h=p_he^{d_h}$$
+
+### 损失函数
+
+$$L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)$$
+
+- p为分类器预测的softmax概率分布，即预测的目标分类
+- u对应目标真实类别标签
+- $t^u$为回归器遇到的回归参数$(t_x^u,t_y^u,t_h^u,t_w^u)$
+- v为真实边界框参数$(v_x,v_y,v_w,v_h)$
+- 分类损失$L_{cls}(p,u)=-logp_u$即交叉熵损失
+- $\lambda$为平衡系数，用于平衡分类损失和回归损失
+- $[u\ge1]$表示$u\ge1$时取1，其余取0
+- 回归损失$L_{loc}(t^u,v)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i^u-v_i)$即平滑L1损失
 
 ## 参考
 
@@ -69,3 +123,9 @@ Fast R-CNN 算法流程分三个步骤：
 [Faster RCNN理论合集](https://www.bilibili.com/video/BV1af4y1m7iL/)
 
 [动手学深度学习](https://zh-v2.d2l.ai/chapter_computer-vision/rcnn.html#id5)
+
+[Understanding Region of Interest — (RoI Pooling)](https://towardsdatascience.com/understanding-region-of-interest-part-1-roi-pooling-e4f5dd65bb44)
+
+[一文读懂 RoIPooling、RoIAlign 和 RoIWarp](https://cloud.tencent.com/developer/article/1689064)
+
+[深度学习之 ROI Pooling](https://blog.csdn.net/fenglepeng/article/details/117885129)
