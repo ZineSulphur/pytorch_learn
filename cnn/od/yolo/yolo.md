@@ -300,6 +300,55 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ***
 
+## YOLOv5
+
+没有论文只有代码[https://github.com/ultralytics/yolov5]
+
+### 网络结构
+
+![YOLOv5结构](./img/yolov5_1.jpg)
+
+- Focus：基本上就是YOLOv2的passthrough。
+- CBL：由Conv+Bn+Leaky ReLU三者3组成。
+- CSP1_X：借鉴CSPNet网络结构，由三个卷积层和X个Res unit模块Concat组成。
+- CSP2_X：不再用Res unit模块，而是改为CBL。
+- SPP：采用1x1，5x5，9x9，13x13的最大池化方式，进行多尺度融合。
+
+- 输入端：Mosaic数据增强、自适应锚框计算、自适应图片缩放
+- Backbone：Focus结构，CSP结构
+- Neck：FPN+PAN结构
+- Head：CIOU_Loss
+
+### 改进内容
+
+- 自适应锚框计算
+
+    在Yolo算法中，针对不同的数据集，都会有初始设定长宽的锚框。
+
+    在网络训练中，网络在初始锚框的基础上输出预测框，进而和真实框groundtruth进行比对，计算两者差距，再反向更新，迭代网络参数。
+
+    在Yolov3、Yolov4中，训练不同的数据集时，计算初始锚框的值是通过单独的程序运行的。
+
+    但Yolov5中将此功能嵌入到代码中，每次训练时，自适应的计算不同训练集中的最佳锚框值。
+
+- 自适应图片缩放
+
+    在常用的目标检测算法中，不同的图片长宽都不相同，因此常用的方式是将原始图片统一缩放到一个标准尺寸，再送入检测网络中。
+
+    因此在Yolov5的代码中datasets.py的letterbox函数中进行了修改，对原始图像自适应的添加最少的黑边。
+
+- Focus结构
+
+    Focus结构是YOLOv5中的一个重要组件，用于提取高分辨率特征。它采用的是一种轻量级的卷积操作，帮助模型在保持较高感受野的同时减少计算负担。Focus结构通过将输入特征图进行通道划分和空间划分，将原始特征图转换为更小尺寸的特征图，并保留了原始特征图中的重要信息。这样做有助于提高模型的感知能力和对小尺寸目标的检测准确性。
+
+    ![YOLOv5focus](./img/yolov5_2.jpg)
+
+- CSP结构
+
+    YOLOv4网络结构中，借鉴了CSPNet的设计思路，仅仅在主干网络中设计了CSP结构。而YOLOv5中设计了两种CSP结构，以YOLOv5s网络为例，CSP1_X结构应用于Backbone主干网络中，另一种CSP2_X结构则应用于Neck网络中。
+
+***
+
 ## 参考文章和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
