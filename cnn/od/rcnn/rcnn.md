@@ -51,6 +51,8 @@ NMS算法首先寻找得分最高的目标，然后计算其它目标与该目�
 
 ## Fast R-CNN
 
+论文[Fast R-CNN](https://www.cv-foundation.org/openaccess/content_iccv_2015/papers/Girshick_Fast_R-CNN_ICCV_2015_paper.pdf)
+
 R-CNN的主要性能瓶颈在于，对每个提议区域，卷积神经网络的前向传播是独立的，而没有共享计算。由于这些区域通常有重叠，独立的特征抽取会导致重复的计算。Fast R-CNN对R-CNN的主要改进之一，是仅在整张图象上执行卷积神经网络的前向传播。
 
 Fast R-CNN 算法流程分三个步骤：
@@ -61,6 +63,8 @@ Fast R-CNN 算法流程分三个步骤：
 ### Fast R-CNN结构
 
 ![FastRCNN结构](./img/fast-rcnn.svg)
+
+![FastRCNN结构论文图](./img/fastrcnn.png)
 
 ### 输入
 
@@ -115,6 +119,58 @@ $$L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)$$
 - $\lambda$为平衡系数，用于平衡分类损失和回归损失
 - $[u\ge1]$表示$u\ge1$时取1，其余取0
 - 回归损失$L_{loc}(t^u,v)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i^u-v_i)$即平滑L1损失
+
+## Faster R-CNN
+
+论文[Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](https://arxiv.org/abs/1506.01497)
+
+为了较精确地检测目标结果，Fast R-CNN模型通常需要在选择性搜索SS中生成大量的提议区域。Faster R-CNN提出将选择性搜索SS替换为区域提议网络RPN（region proposal network），从而减少提议区域的生成数量，并保证目标检测的精度。
+
+Faster R-CNN 算法流程分三个步骤：
+
+1. 将图像输入网络得到相应的特征图
+2. 使用RPN结构生成候选框，将 RPN 生成的候选框投影到特征图上获得相应的特征矩阵。
+3. 将每个特征矩阵通过 ROI pooling 层缩放为7x7大小的特征图，接着将特征图展平通过一系列全连接层获得预测结果。
+
+### Faster R-CNN结构
+
+![fasterrcnn结构](./img/faster-rcnn.svg)
+
+### 区域提议网络RPN（region proposal network）
+
+![RPN结构](./img/RPN.png)
+
+对特征图上使用滑动窗口，每滑动到一个位置时生成一个一维向量，然后分别使用两个全连接层得到2k个分类scores和4k个回归coordinates，即前景和背景的概率和4个预测框参数。
+
+其中一维向量的长度是根据使用backbone的通道数来定的，比如VGG16为512个通道，而使用ZF网络则是256个通道。
+
+每个滑动窗口的中心点对应原始图像中心点和生成的anchor boxes的中心点。
+
+滑动窗口其实就是使用步长为1，padding也为1的3x3卷积。卷积后得到的和特征图尺寸深度都是一样的。
+
+![RPN锚框](./img/rpn2.png)
+
+论文中根据经验得出锚框数k=9，即3种尺度x3种比例的锚框，滑动窗口在 ZF 网络中感受野为 171，而在 VGG16 中为 228。为什么还能预测 256 甚至 512 感受野呢？作者在论文中提出的观点是通过小感受野预测比他大的感受野是有可能的。
+
+对于一个1000x600x3的图像，大约有60x40x9(约20k)个锚框，忽略跨越边界的锚框之后，剩下约6k个锚框。由于RPN生成的候选框之间存在大量的重叠，基于候选框的cls得分，采用非极大值抑制NMS，IoU设为0.7，这样最后剩下约2k个候选框。
+
+注意：anchor box锚框和proposal box候选框不一样，锚框加上四个边界框回归参数才能成为候选框。
+
+实际上生成的这么多候选框并不是每个都用来训练 RPN 网络。对于每张图片我们从上万个候选框当中采样 256 个候选框，这些候选框由正样本和负样本 1:1 组成。如果正样本不足 128，就用负样本进行填充。两种定义正样本的方式：（1）anchor 与 ground-truth 的 iou 超过 0.7，（2）某个 anchor 与 ground-truth 拥有最大的 iou。负样本是与所有的 ground-truth 的 iou 都小于 0.3 的。
+
+### RPN损失函数
+
+$$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum_ip_i^*L_{reg}(t_i,t_i^*)$$
+
+- $p_i$表示第i个anchor预测为真实标签的概率
+- $p_i^*$为正样本时为1，为负样本时为0
+- $t_i$表示预测第i个anchor的边界框回归参数
+- $t_i^*$表示第i个anchor对应的 Ground-True Box
+- $N_{cls}$表示一个mini-batch中所有样本数量256
+- $N_{reg}$表示anchor位置个数（不是anchor个数）约2400
+- $\lambda$为平衡系数，用于平衡分类损失和回归损失
+- 分类损失$L_{cls}=-logp_i$即交叉熵损失
+- 回归损失$L_{loc}(t_i,t_i^*)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i-t_i^*)$即平滑L1损失
 
 ## 参考
 
