@@ -235,11 +235,12 @@ Darknet53的主要改进：
 
 ### 损失函数
 
-$$Loss=\lambda_{coord}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[(x_i^j-\hat{x}_i^j)^2+(y_i^j-\hat{y}_i^j)^2] \\
-+\lambda_{coord}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[(x_i^j-\hat{x}_i^j)^2+(y_i^j-\hat{y}_i^j)^2] \\
--\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[\hat{C}_i^jlog(C_j^j)+(1-\hat{C}_i^j)log(1-C_j^j)] \\
--\lambda_{noobj}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{noobj}[\hat{C}_i^jlog(C_j^j)+(1-\hat{C}_i^j)log(1-C_j^j)] \\
--\sum_{i=0}^{S^2}I_{ij}^{noobj}\sum_{c\in classes}[\hat{P}_i^j(C)log(P_i^j(C))+(1-\hat{P}_i^j(C))log(P_i^j(C))]$$
+$$\begin{align}
+Loss &=\lambda_{coord}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[(x_i^j-\hat{x}_i^j)^2+(y_i^j-\hat{y}_i^j)^2] \\
+&+\lambda_{coord}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[(x_i^j-\hat{x}_i^j)^2+(y_i^j-\hat{y}_i^j)^2] \\
+&-\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{obj}[\hat{C}_i^jlog(C_j^j)+(1-\hat{C}_i^j)log(1-C_j^j)] \\
+&-\lambda_{noobj}\sum_{i=0}^{S^2}\sum_{j=0}^{B}I_{ij}^{noobj}[\hat{C}_i^jlog(C_j^j)+(1-\hat{C}_i^j)log(1-C_j^j)] \\
+&-\sum_{i=0}^{S^2}I_{ij}^{noobj}\sum_{c\in classes}[\hat{P}_i^j(C)log(P_i^j(C))+(1-\hat{P}_i^j(C))log(P_i^j(C))]\end{align}$$
 
 相比YOLOv1中的损失函数，置信度损失和类别预测的改为了交叉熵损失。
 
