@@ -2,6 +2,35 @@
 
 R-CNN的全称是Region-CNN，是第一个成功将深度学习应用到目标检测上的算法。
 
+- [R-CNN](#r-cnn)
+  - [R-CNN](#r-cnn-1)
+    - [R-CNN结构](#r-cnn结构)
+    - [候选区域生成](#候选区域生成)
+    - [特征提取](#特征提取)
+    - [分类器分类](#分类器分类)
+    - [回归器精细修正](#回归器精细修正)
+    - [缺点](#缺点)
+  - [Fast R-CNN](#fast-r-cnn)
+    - [Fast R-CNN结构](#fast-r-cnn结构)
+    - [输入](#输入)
+    - [兴趣区域汇聚层（RoI pooling）](#兴趣区域汇聚层roi-pooling)
+      - [输入](#输入-1)
+      - [输出](#输出)
+      - [步骤](#步骤)
+    - [输出](#输出-1)
+    - [损失函数](#损失函数)
+  - [Faster R-CNN](#faster-r-cnn)
+    - [Faster R-CNN结构](#faster-r-cnn结构)
+    - [区域提议网络RPN（region proposal network）](#区域提议网络rpnregion-proposal-network)
+    - [RPN损失函数](#rpn损失函数)
+  - [Mask R-CNN](#mask-r-cnn)
+    - [Mask R-CNN结构](#mask-r-cnn结构)
+    - [RoIAlign](#roialign)
+    - [Mask Branch(FCN)](#mask-branchfcn)
+    - [损失函数](#损失函数-1)
+  - [参考](#参考)
+
+
 ## R-CNN
 
 R-CNN算法流程可分为4个步骤
@@ -48,6 +77,8 @@ NMS算法首先寻找得分最高的目标，然后计算其它目标与该目�
 - 训练速度慢，所需空间大
 
     R-CNN需要同时对CNN网络，SVM分类器和回归器进行训练，所需开销较大，过程繁琐。
+
+***
 
 ## Fast R-CNN
 
@@ -120,6 +151,8 @@ $$L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)$$
 - $[u\ge1]$表示$u\ge1$时取1，其余取0
 - 回归损失$L_{loc}(t^u,v)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i^u-v_i)$即平滑L1损失
 
+***
+
 ## Faster R-CNN
 
 论文[Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](https://arxiv.org/abs/1506.01497)
@@ -172,6 +205,80 @@ $$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N
 - 分类损失$L_{cls}=-logp_i$即交叉熵损失
 - 回归损失$L_{loc}(t_i,t_i^*)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i-t_i^*)$即平滑L1损失
 
+***
+
+## Mask R-CNN
+
+论文[Mask R-CNN](https://arxiv.org/abs/1703.06870)
+
+如果在训练集中还标注了每个目标在图像上的像素级位置，那么Mask R-CNN (He et al., 2017)能够有效地利用这些详尽的标注信息进一步提升目标检测的精度。
+
+### Mask R-CNN结构
+
+![MaskRCNN结构](./img/mask-rcnn.svg)
+
+![MaskRCNN](./img/maskrcnn.png)
+
+Mask R-CNN是基于Faster R-CNN修改而来的。
+
+具体来说，Mask R-CNN将兴趣区域汇聚层替换为了 兴趣区域对齐层(RoIAlign)，使用双线性插值（bilinear interpolation）来保留特征图上的空间信息，从而更适于像素级预测。 兴趣区域对齐层的输出包含了所有与兴趣区域的形状相同的特征图。它们不仅被用于预测每个兴趣区域的类别和边界框，还通过额外的全卷积网络Mask分支预测目标的像素级位置。
+
+### RoIAlign
+
+RoI 池化 有一个主要的问题。它在处理过程中丢失了大量的数据。
+
+![RoI4](./img/roi4.png)
+
+量化数据丢失(深蓝色和浅蓝色)，数据获得(绿色)
+
+每次进行 RoI 池化操作的时候，就会丢失关于该对象的部分信息。这降低了整个模型的精确度，很多真正聪明的人都考虑过这个问题。
+
+我们可以将原始RoI分成9个等大小的小格子，并在每个盒子内应用双线性插值。
+
+让我们尝试在RoI中确定进行池化的每个框。每个框的大小由映射的RoI的大小和池化层的大小决定。我们使用了一个 3x3 的池化层，所以我们必须将映射的RoI (6.25x4.53)除以3。这样我们就得到了一个高为 1.51 ，宽为 2.08 的方框(我在这里约简以使它更容易)。现在我们可以把我们的方框放入映射的RoI中:
+
+![roi5](./img/roi5.png)
+
+如果查看第一个框(左上角)，可以注意到它覆盖了6个不同的网格单元格。为了提取池化层的值，我们必须从池化层中采样一些数据。为了对数据进行采样，我们必须在盒子里创建 四个采样点。
+
+采样点个数由参数决定，作者在论文中提到，最终的采样结果与采样点位置和个数并不敏感。
+
+![roi6](./img/roi6.png)
+
+采样点的位置为等分点的位置。
+
+现在，当我们有了所有的点我们可以应用双线性插值对这个方框进行数据采样。图像处理中常用双线性插值对颜色进行采样，其方程如下:
+
+$$P\approx \frac{y_2-y}{y_2-y_1}(\frac{x_2-x}{x_2-x_1}Q_{11}+\frac{x-x_1}{x_2-x_1}Q_{21})+\frac{y-y_1}{y_2-y_1}(\frac{x_2-x}{x_2-x_1}Q_{12}+\frac{x-x_1}{x_2-x_1}Q_{22})$$
+
+然后将采样点和最近的四个特征图的中心点做双线性差值，得到采样点的值。
+
+![roi7](./img/roi7.png)
+
+取所有采样点的平均值作为RoIAlign的结果
+
+![roi8](./img/roi8.gif)
+
+### Mask Branch(FCN)
+
+对于带有FPN和不带有FPN的Mask R-CNN，他们的Mask分支不太一样。下图左边是不带FPN结构的Mask分支，右侧是带有FPN结构的Mask分支（灰色部分为原Faster R-CNN预测box, class信息的分支，白色部分为Mask分支）。
+
+在使用FCN的网络中，Mask分支和Fast R-CNN不共用RoIAlign，它们的大小是不同的，更大的输出有助于mask的生成。
+
+![fcn](./img/fcn.png)
+
+### 损失函数
+
+Mask R-CNN的损失就是在Faster R-CNN的基础上加上Mask分支的损失
+
+$$Loss=L_{rpn}+L_{fast\_rcnn}+L_{mask}$$
+
+在讲Mask分支损失计算之前，我们要弄清楚logits（网络预测的输出）是什么，targets（对应的GT）是什么。前面有提到训练时输入Mask分支的目标是RPN提供的Proposals，所以网络预测的logits是针对每个Proposal对应每个类别的Mask信息（注意预测的Mask大小都是28x28）。并且这里输入的Proposals都是正样本（在Fast R-CNN阶段采样得到的），对应的GT信息（box、cls）也是知道的。
+
+如下图所示，假设通过RPN得到了一个Proposal（图中黑色的矩形框），通过RoIAlign后得到对应的特征信息（shape为14x14xC），接着通过Mask Branch预测每个类别的Mask信息得到图中的logits（logits通过sigmoid激活函数后，所有值都被映射到0至1之间）。通过Fast R-CNN分支正负样本匹配过程我们能够知道该Proposal的GT类别为猫（cat），所以将logits中对应类别猫的预测mask（shape为28x28）提取出来。然后根据Proposal在原图对应的GT上裁剪并缩放到28x28大小，得到图中的GT mask（对应目标区域为1，背景区域为0）。最后计算logits中预测类别为猫的mask与GT mask的BCELoss（BinaryCrossEntropyLoss）即可。
+
+![Maskloss](./img/maskloss.png)
+
 ## 参考
 
 [R-CNN系列巨详细解读](https://zhuanlan.zhihu.com/p/658024219)
@@ -185,3 +292,5 @@ $$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N
 [一文读懂 RoIPooling、RoIAlign 和 RoIWarp](https://cloud.tencent.com/developer/article/1689064)
 
 [深度学习之 ROI Pooling](https://blog.csdn.net/fenglepeng/article/details/117885129)
+
+[Mask R-CNN网络详解](https://www.bilibili.com/video/BV1ZY411774T/)
