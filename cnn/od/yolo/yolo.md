@@ -485,7 +485,7 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 - PAN-FPN：YOLOv8依旧使用了PAN的思想，不同的是YOLOv8将YOLOv5中PAN-FPN上采样阶段中的卷积结构删除了，同时也将C3模块替换为了C2f模块；
 - Decoupled-Head：这一点源自YOLOX；分类和回归两个任务的head不再共享参数，YoloV8也借鉴了这样的head设计。
 - Anchor-Free：YOLOv8抛弃了以往的Anchor-Base，使用了Anchor-Free的思想；
-- 损失函数：YOLOv8使用VFL Loss作为分类损失，使用DFL Loss+CIOU Loss作为分类损失；
+- 损失函数：YOLOv8使用VFL Loss作为分类损失，使用DFL Loss+CIOU Loss作为回归损失；
 - 样本匹配：YOLOv8抛弃了以往的IOU匹配或者单边比例的分配方式，而是使用了Task-Aligned Assigner匹配方式。
 
 ### C2f
