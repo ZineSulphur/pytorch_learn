@@ -388,6 +388,28 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ***
 
+## YOLOv7
+
+论文[YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/pdf/2207.02696)
+
+代码[https://arxiv.org/pdf/2207.02696]
+
+### 模型结构
+
+![YOLOv7](./img/yolov7_1.png)
+
+首先对输入的图片 resize 为 640x640 大小，输入到 backbone 网络中，然后经 head 层网络输出三层不同 size 大小的 **feature map**，经过 Rep 和 conv输出预测结果，这里以 coco 为例子，输出为 80 个类别，然后每个输出(x ,y, w, h, o) 即坐标位置和前后背景，3 是指的 anchor 数量，因此每一层的输出为 (80+5)x3 = 255再乘上 feature map 的大小就是最终的输出了。
+
+### 改进部分
+
+- CBS结构：特征提取和通道转换。
+- ELAN：通过不同的分支将特征图拼接起来，进而促进更深层网络的有效学习和收敛。
+- MP-1：将经过不同下采样方式所得到的特征图进行融合，在不增加计算量的同时保留更多的特征信息。
+- SPPCSPC模块用于提高特征提取的效率和准确率
+- ELANW模块相比于ELAN模块增加了两个拼接操作
+
+***
+
 ## 参考文章和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
