@@ -660,3 +660,5 @@ class SCDown(nn.Module):
 [Yolov8的详解与实战-](https://zhuanlan.zhihu.com/p/668516241)
 
 [YOLOv10真正实时端到端目标检测（原理介绍+代码详见+结构框图）| YOLOv10如何训练自己的数据集（NEU-DET为案列）](https://zhuanlan.zhihu.com/p/700016361)
+
+[YOLOv10 正式发布！原理、部署、应用一站式齐全](https://blog.csdn.net/CVHub/article/details/139204248)
