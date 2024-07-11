@@ -456,7 +456,38 @@ DFL的含义是以交叉熵的形式去优化与标签y最接近的一左一右2
 
 ***
 
-## 参考文章和推荐
+## YOLOv9
+
+论文[YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information](https://arxiv.org/abs/2402.13616)
+
+代码[https://github.com/WongKinYiu/yolov9]
+
+### 网络结构
+
+![YOLOv9](./img/yolov9_1.png)
+
+### 改进内容
+
+- 可编程梯度信息（PGI）
+
+    论文提出了一种新的辅助监督框架，称为可编程梯度信息（PGI），如图（d）所示。 PGI主要包括三个组成部分：主分支、辅助可逆分支、多级辅助信息。
+
+    ![YOLOv9PGI](./img/yolov9_2.png)
+
+    从图(d)中我们可以看出，PGI的推理过程仅使用主分支，因此不需要任何额外的推理成本。至于其他两个组件，它们仅用于训练阶段而不在推理阶段，用于解决或减缓深度学习方法中的几个重要问题：
+
+  - 辅助可逆分支：是为了处理神经网络加深带来的问题而设计的。网络加深会造成信息瓶颈，导致损失函数无法生成可靠的梯度。
+  - 对于多级辅助信息：旨在处理深度监督带来的误差累积问题，特别是针对多个预测分支的架构和轻量级模型。
+
+- GELAN
+
+    通过结合采用梯度路径规划设计的两种神经网络架构CSPNet 和ELAN ，论文设计了兼顾轻量级、推理速度和准确性的广义高效层聚合网络（GELAN）。其整体架构如图 4 所示。论文将最初仅使用卷积层堆叠的 ELAN 的功能推广到可以使用任何计算块的新架构。
+
+    ![YOLOv9GELAN](./img/yolov9_3.png)
+
+***
+
+## 参考和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
 
