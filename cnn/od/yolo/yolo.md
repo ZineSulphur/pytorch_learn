@@ -410,6 +410,52 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ***
 
+## YOLOv8
+
+代码[https://github.com/ultralytics/ultralytics]
+
+### 模型结构
+
+![YOLOv8](./img/yolov8_1.jpg)
+
+### 改进内容
+
+- Backbone：使用的依旧是CSP的思想，将YOLOv5中的C3模块被替换成了C2f模块，实现了进一步的轻量化，同时YOLOv8依旧使用了YOLOv5等架构中使用的SPPF模块；
+- PAN-FPN：YOLOv8依旧使用了PAN的思想，不同的是YOLOv8将YOLOv5中PAN-FPN上采样阶段中的卷积结构删除了，同时也将C3模块替换为了C2f模块；
+- Decoupled-Head：这一点源自YOLOX；分类和回归两个任务的head不再共享参数，YoloV8也借鉴了这样的head设计。
+- Anchor-Free：YOLOv8抛弃了以往的Anchor-Base，使用了Anchor-Free的思想；
+- 损失函数：YOLOv8使用VFL Loss作为分类损失，使用DFL Loss+CIOU Loss作为分类损失；
+- 样本匹配：YOLOv8抛弃了以往的IOU匹配或者单边比例的分配方式，而是使用了Task-Aligned Assigner匹配方式。
+
+### C2f
+
+先经过一个Conv，然后使用chunk函数将out平均拆分成两个向量，然后保存到list中，将后半部分输入到Bottleneck Block里面，Bottleneck Block里面有n个Bottleneck，将每个Bottleneck的输出都追加list中，有n个，所以拼接之后的out等于0.5✖(n+2)。然后经过一个Conv输出，所以输出为h×w×c_out。
+
+![yolov8c2f](./img/yolov8_2.jpg)
+
+C2f模块参考了C3模块以及ELAN的思想进行的设计，让YOLOv8可以在保证轻量化的同时获得更加丰富的梯度流信息。
+
+### 损失函数
+
+对于YOLOv8，其分类损失为VFL Loss，其回归损失为CIOU Loss+DFL的形式，这里Reg_max默认为16。
+
+VFL主要改进是提出了非对称的加权操作，FL和QFL都是对称的。而非对称加权的思想来源于论文PISA，该论文指出首先正负样本有不平衡问题，即使在正样本中也存在不等权问题，因为mAP的计算是主正样本。
+
+$$VFL(p,q)=\begin{cases}
+    -q(qlog(p)+(1-q)log(1-p)) &, q>0 \\
+    -\alpha p^\gamma log(1-p) &, q=0
+\end{cases}$$
+
+q是label，正样本时候q为bbox和gt的IoU，负样本时候q=0，当为正样本时候其实没有采用FL，而是普通的BCE，只不过多了一个自适应IoU加权，用于突出主样本。而为负样本时候就是标准的FL了。可以明显发现VFL比QFL更加简单，主要特点是正负样本非对称加权、突出正样本为主样本。
+
+针对这里的DFL（Distribution Focal Loss），其主要是将框的位置建模成一个 general distribution，让网络快速的聚焦于和目标位置距离近的位置的分布。
+
+DFL 能够让网络更快地聚焦于目标 y 附近的值，增大它们的概率；
+
+DFL的含义是以交叉熵的形式去优化与标签y最接近的一左一右2个位置的概率，从而让网络更快的聚焦到目标位置的邻近区域的分布；也就是说学出来的分布理论上是在真实浮点坐标的附近，并且以线性插值的模式得到距离左右整数坐标的权重。
+
+***
+
 ## 参考文章和推荐
 
 [YOLO系列算法全家桶——YOLOv1-YOLOv9详细介绍 ！！](https://cloud.tencent.com/developer/article/2406045)
@@ -419,3 +465,5 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 [目标检测——Yolo系列（YOLOv1/2/v3/4/5/x/6/7/8）](https://blog.csdn.net/zyw2002/article/details/125443226)
 
 [深入浅出Yolo系列之Yolov3&Yolov4&Yolov5&Yolox核心基础知识完整讲解](https://zhuanlan.zhihu.com/p/143747206)
+
+[Yolov8的详解与实战-](https://zhuanlan.zhihu.com/p/668516241)
