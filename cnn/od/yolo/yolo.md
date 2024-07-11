@@ -492,6 +492,8 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ### C2f
 
+yolov5中的C3模块在yolov8中被替换为了C2f，C2f则采用了yolov7中ELAN 多层堆叠的结构，增加了更多类似resnet残差块中的跳跃连接,丰富了模型的梯度流。
+
 ![yolov8c2f2](./img/c2f.png)
 
 先经过一个Conv，然后使用chunk函数将out平均拆分成两个向量，然后保存到list中，将后半部分输入到Bottleneck Block里面，Bottleneck Block里面有n个Bottleneck，将每个Bottleneck的输出都追加list中，有n个，所以拼接之后的out等于0.5✖(n+2)。然后经过一个Conv输出，所以输出为h×w×c_out。
