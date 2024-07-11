@@ -32,6 +32,7 @@
     - [模型结构](#模型结构-5)
     - [改进内容](#改进内容-3)
     - [C2f](#c2f)
+    - [SPPF](#sppf)
     - [损失函数](#损失函数-2)
   - [YOLOv9](#yolov9)
     - [网络结构](#网络结构-2)
@@ -491,11 +492,19 @@ Bag of speacials: 增加稍许推断代价，单可以提高模型精度的方�
 
 ### C2f
 
+![yolov8c2f2](./img/c2f.png)
+
 先经过一个Conv，然后使用chunk函数将out平均拆分成两个向量，然后保存到list中，将后半部分输入到Bottleneck Block里面，Bottleneck Block里面有n个Bottleneck，将每个Bottleneck的输出都追加list中，有n个，所以拼接之后的out等于0.5✖(n+2)。然后经过一个Conv输出，所以输出为h×w×c_out。
 
 ![yolov8c2f](./img/yolov8_2.jpg)
 
 C2f模块参考了C3模块以及ELAN的思想进行的设计，让YOLOv8可以在保证轻量化的同时获得更加丰富的梯度流信息。
+
+### SPPF
+
+YOLOv8使用了SPPF（Spatial Pyramid Pooling Fast）模块，它通过不同尺寸的池化窗口捕捉多尺度的特征，增强了模型对不同尺寸目标的检测能力。
+
+![yolov8sppf](./img/SPPF.png)
 
 ### 损失函数
 
