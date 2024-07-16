@@ -149,7 +149,7 @@ $$L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)$$
 - 分类损失$L_{cls}(p,u)=-logp_u$即交叉熵损失
 - $\lambda$为平衡系数，用于平衡分类损失和回归损失
 - $[u\ge1]$表示$u\ge1$时取1，其余取0
-- 回归损失$L_{loc}(t^u,v)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i^u-v_i)$即平滑L1损失
+- 回归损失$L_{loc}(t^u,v)=\sum\limits_{i\in(x,y,w,h)}smooth_{L1}(t_i^u-v_i)$即平滑L1损失
 
 ***
 
@@ -193,7 +193,7 @@ Faster R-CNN 算法流程分三个步骤：
 
 ### RPN损失函数
 
-$$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum_ip_i^*L_{reg}(t_i,t_i^*)$$
+$$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum\limits_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum\limits_ip_i^*L_{reg}(t_i,t_i^*)$$
 
 - $p_i$表示第i个anchor预测为真实标签的概率
 - $p_i^*$为正样本时为1，为负样本时为0
@@ -203,7 +203,7 @@ $$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N
 - $N_{reg}$表示anchor位置个数（不是anchor个数）约2400
 - $\lambda$为平衡系数，用于平衡分类损失和回归损失
 - 分类损失$L_{cls}=-logp_i$即交叉熵损失
-- 回归损失$L_{loc}(t_i,t_i^*)=\sum_{i\in(x,y,w,h)}smooth_{L1}(t_i-t_i^*)$即平滑L1损失
+- 回归损失$L_{loc}(t_i,t_i^*)=\sum\limits_{i\in(x,y,w,h)}smooth_{L1}(t_i-t_i^*)$即平滑L1损失
 
 ***
 
