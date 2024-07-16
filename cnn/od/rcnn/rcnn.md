@@ -193,7 +193,7 @@ Faster R-CNN 算法流程分三个步骤：
 
 ### RPN损失函数
 
-$$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum\limits_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum\limits_ip_i^*L_{reg}(t_i,t_i^*)$$
+$$L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum_ip_i^*L_{reg}(t_i,t_i^*)$$
 
 - $p_i$表示第i个anchor预测为真实标签的概率
 - $p_i^*$为正样本时为1，为负样本时为0
