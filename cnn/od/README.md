@@ -39,10 +39,12 @@
 
 ## 结构
 
-- rcnn rcnn学习内容
-  - [rcnn.md](./rcnn/rcnn.md) rcnn学习笔记
-- yolo yolo学习内容
-  - [yolo.md](./yolo/yolo.md) yolo学习笔记
+- rcnn R-CNN学习内容
+  - [rcnn.md](./rcnn/rcnn.md) R-CNN学习笔记
+- yolo YOLO学习内容
+  - [yolo.md](./yolo/yolo.md) YOLO学习笔记
+- detr DETR学习内容
+  - [detr.md](./detr/detr.md) DETR学习笔记
 
 ## 参考文章
 
