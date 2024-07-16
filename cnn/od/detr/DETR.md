@@ -61,7 +61,39 @@ object queries为100x256(n,b)即要生成的100个目标的框和输入张量的
 
 ## 损失函数
 
+DETR默认会输出N个输出，无论有多少物体都会输出N个，默认为100个。
 
+但是这么多输出组成的输出集怎么计算loss呢，于是作者将其转换成二分图匹配的问题。二分图匹配的问题可以认为是如何分配工人和工作使最终的开销最小的问题，像匈牙利算法就是一个高效的解决算法。
+
+而目标检测也是这种二分图匹配的问题，把预测框和真实框看成二分图的两个部分，使其准确度最高。而这种方法和之前的anchor box的loss是差不多的，只不过之前的约束更弱，为一对多的框，而这里二分图问题则是一对一的框，从而解决了NMS的问题。
+
+作者最终选择了匈牙利算法计算损失函数，也分为分类loss和bbox loss。
+
+接下来我们把第i个值的ground-true值表示为$y_i=(c_i,b_i)$，其中$c_i$为分类class值，$b_i$为bounding box的值。并且定义$\hat{y}_i$为对应的预测值。
+
+由匈牙利算法，第i个GT值对应的$\sigma(i)$为匈牙利算法得到的预测值的索引，即和第i个真实值最接近的预测框为第$\sigma(i)$个预测框。
+
+由匈牙利算法得到下面的公式：
+
+$$\hat{\sigma}=\argmin_{\sigma\in\mathfrak{G}_N}\sum\limits_{i}^{N}\mathcal{L}_{macth}(y_i,\hat{y}_{\sigma(i)})$$
+
+即对于某一个真值$y_i$，假设我们已经找到这个真值对应的预测值$\hat{y}_{\sigma(i)}$，这里的$\mathfrak{G}_N$是所有可能的排列，代表从真值索引到预测值索引的所有的映射，然后用$\mathcal{L}_{macth}$最小化$y_i$和$\hat{y}_{\sigma(i)}$的距离。
+
+其中$\mathcal{L}_{macth}$具体是：
+
+$$\mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$$
+
+前半部分为分类部分，后半部分为回归部分，分别为分类的预测值$\hat{p}_{\sigma(i)}(c_i)$和回归的预测值和真实值的差异$\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$。
+
+此外$\mathbb{1}_{\{c_i\ne\varnothing\}}$表示匹配上时才取这个值，没有匹配上则取0忽略整个式子。
+
+而$\mathcal{L}_{macth}$则使用`scipy.optimize`这个库中的`linear_sum_assignment`函数即匈牙利算法的实现获得。
+
+这么看来其实损失函数和其它的目标检测算法差不多，只是其它的是真实框和目标框一对多匹配，而这里是一对一匹配。
+
+综合上面的公式，我们得到最终的公式：
+
+$$\mathcal{L}_{Hungarian}(y,\hat{y})=\sum\limits_{i=1}^{N}[-log\hat{p}_{\hat{\sigma}(i)}(c_i)+1_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\hat{\sigma}}(i))]$$
 
 ## 参考
 
