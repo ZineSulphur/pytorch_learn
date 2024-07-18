@@ -87,9 +87,7 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 \mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})
 ```
 
-前半部分为分类部分，后半部分为回归部分，分别为分类的预测值 $\hat{p}_{\sigma(i)}(c_i)$ 
-
-和回归的预测值和真实值的差异 $\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$ 。
+前半部分为分类部分，后半部分为回归部分，分别为分类的预测值 $\hat{p}_{\sigma(i)}(c_i)$ 和回归的预测值和真实值的差异 $\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$ 。
 
 此外 $\mathbb{1}_{\{c_i\ne\varnothing\}}$ 表示匹配上时才取这个值，没有匹配上则取0忽略整个式子。
 
