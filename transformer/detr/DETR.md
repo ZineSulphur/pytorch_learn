@@ -77,11 +77,19 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 
 $$\hat{\sigma}=\argmin_{\sigma\in\mathfrak{G}_N}\sum\limits_{i}^{N}\mathcal{L}_{macth}(y_i,\hat{y}_{\sigma(i)})$$
 
+```math
+\hat{\sigma}=\argmin_{\sigma\in\mathfrak{G}_N}\sum\limits_{i}^{N}\mathcal{L}_{macth}(y_i,\hat{y}_{\sigma(i)})
+```
+
 即对于某一个真值$y_i$，假设我们已经找到这个真值对应的预测值$\hat{y}_{\sigma(i)}$，这里的$\mathfrak{G}_N$是所有可能的排列，代表从真值索引到预测值索引的所有的映射，然后用$\mathcal{L}_{macth}$最小化$y_i$和$\hat{y}_{\sigma(i)}$的距离。
 
 其中$\mathcal{L}_{macth}$具体是：
 
 $$\mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$$
+
+```math
+\mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})
+```
 
 前半部分为分类部分，后半部分为回归部分，分别为分类的预测值$\hat{p}_{\sigma(i)}(c_i)$和回归的预测值和真实值的差异$\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$。
 
@@ -94,6 +102,10 @@ $$\mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i
 综合上面的公式，我们得到最终的公式：
 
 $$\mathcal{L}_{Hungarian}(y,\hat{y})=\sum\limits_{i=1}^{N}[-log\hat{p}_{\hat{\sigma}(i)}(c_i)+1_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\hat{\sigma}}(i))]$$
+
+```math
+\mathcal{L}_{Hungarian}(y,\hat{y})=\sum\limits_{i=1}^{N}[-log\hat{p}_{\hat{\sigma}(i)}(c_i)+1_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\hat{\sigma}}(i))]
+```
 
 ## 参考
 
