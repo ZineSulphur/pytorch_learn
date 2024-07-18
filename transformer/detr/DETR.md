@@ -69,7 +69,7 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 
 作者最终选择了匈牙利算法计算损失函数，也分为分类loss和bbox loss。
 
-接下来我们把第i个值的ground-true值表示为 $y_i=(c_i,b_i)$ ，其中 $c_i$ 为分类class值，$b_i$为bounding box的值。并且定义 $\hat{y}_i$ 为对应的预测值。
+接下来我们把第i个值的ground-true值表示为 $y_i=(c_i,b_i)$ ，其中 $c_i$ 为分类class值，$b_i$ 为bounding box的值。并且定义 $\hat{y}_i$ 为对应的预测值。
 
 由匈牙利算法，第i个GT值对应的 $\sigma(i)$ 为匈牙利算法得到的预测值的索引，即和第i个真实值最接近的预测框为第 $\sigma(i)$ 个预测框。
 
@@ -87,7 +87,9 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 \mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})
 ```
 
-前半部分为分类部分，后半部分为回归部分，分别为分类的预测值 $\hat{p}_{\sigma(i)}(c_i)$ 和回归的预测值和真实值的差异 $\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$ 。
+前半部分为分类部分，后半部分为回归部分，分别为分类的预测值 $\hat{p}_{\sigma(i)}(c_i)$ 
+
+和回归的预测值和真实值的差异 $\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$ 。
 
 此外 $\mathbb{1}_{\{c_i\ne\varnothing\}}$ 表示匹配上时才取这个值，没有匹配上则取0忽略整个式子。
 
