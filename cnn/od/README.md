@@ -44,7 +44,7 @@
 - yolo YOLO学习内容
   - [yolo.md](./yolo/yolo.md) YOLO学习笔记
 - detr DETR学习内容
-  - [detr.md](./detr/detr.md) DETR学习笔记
+  - [detr.md](../../transformer/detr/detr.md) DETR学习笔记
 
 ## 参考文章
 

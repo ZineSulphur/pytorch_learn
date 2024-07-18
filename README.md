@@ -14,3 +14,6 @@
       * [rcnn.md](./cnn/od/rcnn/rcnn.md)
     * yolo - YOLO学习笔记和代码
       * [yolo.md](./cnn/od/yolo/yolo.md)
+* transformer - Tranformer相关练习项目代码和学习笔记
+  * detr - DETR学习笔记和代码
+    * [detr.md](./transformer/detr/detr.md)
