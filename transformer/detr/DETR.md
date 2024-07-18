@@ -69,7 +69,7 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 
 作者最终选择了匈牙利算法计算损失函数，也分为分类loss和bbox loss。
 
-接下来我们把第i个值的ground-true值表示为 $y_i=(c_i,b_i)$ ，其中 $c_i$ 为分类class值，$b_i$ 为bounding box的值。并且定义 $\hat{y}_i$ 为对应的预测值。
+接下来我们把第i个值的ground-true值表示为 $y_i=(c_i,b_i)$ ，其中 $c_i$ 为分类class值， $b_i$ 为bounding box的值。并且定义 $\hat{y}_i$ 为对应的预测值。
 
 由匈牙利算法，第i个GT值对应的 $\sigma(i)$ 为匈牙利算法得到的预测值的索引，即和第i个真实值最接近的预测框为第 $\sigma(i)$ 个预测框。
 
@@ -102,6 +102,59 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 ```math
 \mathcal{L}_{Hungarian}(y,\hat{y})=\sum\limits_{i=1}^{N}[-log\hat{p}_{\hat{\sigma}(i)}(c_i)+1_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\hat{\sigma}}(i))]
 ```
+
+## 代码
+
+在论文的最后，作者给出了DETR的伪代码，其实就是pytorch的代码。
+
+```python
+import torch
+from torch import nn
+from torchvision.models import resnet50
+
+class DETR(nn.Module):
+
+def __init__(self, num_classes, hidden_dim, nheads,
+num_encoder_layers, num_decoder_layers):
+super().__init__()
+# We take only convolutional layers from ResNet-50 model
+self.backbone = nn.Sequential(*list(resnet50(pretrained=True).children())[:-2])
+self.conv = nn.Conv2d(2048, hidden_dim, 1)
+self.transformer = nn.Transformer(hidden_dim, nheads,
+num_encoder_layers, num_decoder_layers)
+self.linear_class = nn.Linear(hidden_dim, num_classes + 1)
+self.linear_bbox = nn.Linear(hidden_dim, 4)
+self.query_pos = nn.Parameter(torch.rand(100, hidden_dim))
+self.row_embed = nn.Parameter(torch.rand(50, hidden_dim // 2))
+self.col_embed = nn.Parameter(torch.rand(50, hidden_dim // 2))
+
+def forward(self, inputs):
+x = self.backbone(inputs)
+h = self.conv(x)
+H, W = h.shape[-2:]
+pos = torch.cat([
+self.col_embed[:W].unsqueeze(0).repeat(H, 1, 1),
+self.row_embed[:H].unsqueeze(1).repeat(1, W, 1),
+], dim=-1).flatten(0, 1).unsqueeze(1)
+h = self.transformer(pos + h.flatten(2).permute(2, 0, 1),
+self.query_pos.unsqueeze(1))
+return self.linear_class(h), self.linear_bbox(h).sigmoid()
+
+detr = DETR(num_classes=91, hidden_dim=256, nheads=8, num_encoder_layers=6, num_decoder_layers=6)
+detr.eval()
+inputs = torch.randn(1, 3, 800, 1200)
+logits, bboxes = detr(inputs)
+```
+
+在初始化内容中，指定了backbone为resnet50，然后指定投射层conv，以及transformer和检测头的全连接层FFN，以及query object和位置编码embedding。
+
+其中参数num_classes为分类数，hidden_dim为transformer的hidden dimension，nheads为多头注意力的数量，num_encoder_layers和num_decoder_layers为encoder和decoder的层数。
+
+在forward正向传播部分，我们可以看到这里的过程和之前模型的执行过程相同，首先卷积得到特征，然后resize特征向量和位置编码相加，然后进入transformer部分，最后进入FNN输出。
+
+最后，再构建模型实例，进行相关训练或者推理即可。
+
+在此可见，这个模型确如作者所说非常简单，其代码也是50多行就可以了，简单但是有效且有力。
 
 ## 参考
 
