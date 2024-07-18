@@ -79,19 +79,19 @@ DETR默认会输出N个输出，无论有多少物体都会输出N个，默认�
 \hat{\sigma}=\argmin_{\sigma\in\mathfrak{G}_N}\sum\limits_{i}^{N}\mathcal{L}_{macth}(y_i,\hat{y}_{\sigma(i)})
 ```
 
-即对于某一个真值$y_i$，假设我们已经找到这个真值对应的预测值$\hat{y}_{\sigma(i)}$，这里的$\mathfrak{G}_N$是所有可能的排列，代表从真值索引到预测值索引的所有的映射，然后用$\mathcal{L}_{macth}$最小化$y_i$和$\hat{y}_{\sigma(i)}$的距离。
+即对于某一个真值$y_i$，假设我们已经找到这个真值对应的预测值$\hat{y}_{\sigma(i)}$，这里的${G}_N$是所有可能的排列，代表从真值索引到预测值索引的所有的映射，然后用${L}_{macth}$最小化$y_i$和$\hat{y}_{\sigma(i)}$的距离。
 
-其中$\mathcal{L}_{macth}$具体是：
+其中${L}_{macth}$具体是：
 
 ```math
 \mathcal{L}_{match}=-\mathbb{1}_{\{c_i\ne\varnothing\}}\hat{p}_{\sigma(i)}(c_i)+\mathbb{1}_{\{c_i\ne\varnothing\}}\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})
 ```
 
-前半部分为分类部分，后半部分为回归部分，分别为分类的预测值$\hat{p}_{\sigma(i)}(c_i)$和回归的预测值和真实值的差异$\mathcal{L}_{box}(b_i,\hat{b}_{\sigma(i)})$。
+前半部分为分类部分，后半部分为回归部分，分别为分类的预测值$\hat{p}_{\sigma(i)}(c_i)$和回归的预测值和真实值的差异${L}_{box}(b_i,\hat{b}_{\sigma(i)})$。
 
-此外$\mathbb{1}_{\{c_i\ne\varnothing\}}$表示匹配上时才取这个值，没有匹配上则取0忽略整个式子。
+此外${1}_{\{c_i\ne\varnothing\}}$表示匹配上时才取这个值，没有匹配上则取0忽略整个式子。
 
-而$\mathcal{L}_{macth}$则使用`scipy.optimize`这个库中的`linear_sum_assignment`函数即匈牙利算法的实现获得。
+而${L}_{macth}$则使用`scipy.optimize`这个库中的`linear_sum_assignment`函数即匈牙利算法的实现获得。
 
 这么看来其实损失函数和其它的目标检测算法差不多，只是其它的是真实框和目标框一对多匹配，而这里是一对一匹配。
 
