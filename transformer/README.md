@@ -112,11 +112,27 @@ W_i^Q\in\mathbb{R}^{d_{model}xd_k},W_i^K\in\mathbb{R}^{d_{model}xd_k},W_i^V\in\m
 
 ## Embedding
 
-### 单词 Token Embedding
+### 单词 Embedding
 
 单词的 Embedding 有很多种方式可以获取，例如可以采用 Word2Vec、Glove 等算法预训练得到，也可以在 Transformer 中训练得到。
 
-### 位置 Position Embedding
+### 位置编码 Positional Encoding
+
+Transformer不像RNN那样的循环结构有不同的时间先后顺序，所有输入和推理是并行的。因此为了充分利用输入中的位置信息，作者需要注入一些相对和绝对的位置信息。于是作者引入了位置编码，他有和输入相同的维度大小，并且和输入的Embedding相加。
+
+位置编码有很多种实现方法，可以由神经网络实现，也可以通过公式实现：
+
+$$
+PE_{(pos,2i)}=sin(pos/10000^{2i/d_{model} }) \\
+PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{model} })
+$$
+
+其中，pos 表示单词在句子中的位置，d 表示 PE的维度 (与词 Embedding 一样)，2i 表示偶数的维度，2i+1 表示奇数维度 (即 2i≤d, 2i+1≤d)。使用这种公式计算 PE 有以下的好处：
+
+- 使 PE 能够适应比训练集里面所有句子更长的句子，假设训练集里面最长的句子是有 20 个单词，突然来了一个长度为 21 的句子，则使用公式计算的方法可以计算出第 21 位的 Embedding。
+- 可以让模型容易地计算出相对位置，对于固定长度的间距 k，PE(pos+k) 可以用 PE(pos) 计算得到。因为 Sin(A+B) = Sin(A)Cos(B) + Cos(A)Sin(B), Cos(A+B) = Cos(A)Cos(B) - Sin(A)Sin(B)。
+
+将单词的词 Embedding 和位置 Embedding 相加，就可以得到单词的表示向量 x，x 就是 Transformer 的输入。
 
 ***
 
