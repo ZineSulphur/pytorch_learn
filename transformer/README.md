@@ -40,9 +40,11 @@
 
 $$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$$
 
-最常用的两种注意力函数是加性注意力和点积（乘性）注意力。点积注意力与我们的算法相同，除了缩放因子1/√dk。加性注意力使用一个带有单个隐藏层的前馈网络来计算兼容性函数。虽然两者在理论复杂度上相似，但点积注意力在实践中更快且空间效率更高，因为它可以使用高度优化的矩阵乘法代码实现。
+最常用的两种注意力函数是加性注意力和点积（乘性）注意力。点积注意力除了缩放因子1/√dk与点积算法相同。
 
-对于较小的dk值，两种机制表现相似，但对于较大的dk值，加性注意力在没有缩放的情况下优于点积注意力[3]。我们怀疑，对于较大的dk值，点积的幅度会变得很大，使得softmax函数进入梯度极小的区域。为了抵消这种影响，我们将点积缩放为1/√dk。
+加性注意力使用一个带有单个隐藏层的前馈网络来计算兼容性函数。虽然两者在理论复杂度上相似，但点积注意力在实践中更快且空间效率更高，因为它可以使用高度优化的矩阵乘法代码实现。
+
+对于较小的dk值，两种机制表现相似，但对于较大的dk值，加性注意力在没有缩放的情况下优于点积注意力。我们怀疑，对于较大的dk值，点积的结果会变得很大，使得softmax函数进入梯度极小的区域。为了抵消这种影响，我们将点积缩放为1/√dk。
 
 #### 工作流程
 
@@ -87,10 +89,12 @@ $$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$$
 多头注意力模型公式如下
 
 ```math
-MutilHead(Q,K,V)=Concat(head_1,...,head_h)W^O \\
-\\
-where head_i=Attention(QW_i^Q,KW_i^K,VW_i^V) \\
-\\
+MutilHead(Q,K,V)=Concat(head_1,...,head_h)W^O
+```
+```math
+where\ head_i=Attention(QW_i^Q,KW_i^K,VW_i^V)
+```
+```math
 W_i^Q\in\mathbb{R}^{d_{model}xd_k},W_i^K\in\mathbb{R}^{d_{model}xd_k},W_i^V\in\mathbb{R}^{d_{model}xd_k}
 ```
 
@@ -174,7 +178,59 @@ $$FFN(x)=max(0,xW_1+b_1)W_2+b_2$$
 
 ### Masked Multi-Head Attention
 
+#### 原因
+
+Masked Multi-Head Attention相对于普通的MHA来说只是在上面运用了Mask掩码，那么我们为什么要在上面运用掩码呢？
+
+首先对一个MHA而言，其公式如下：
+
+$$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$$
+
+得到的注意力矩阵Attention的每一行分别是一个单词token对另外一个单词的注意力向量即 $Q_i$ 和 $K_j$ 的点积和 $V_j$ 的乘积。比如我们的输入为`Machine Learning is fun`，其Attention矩阵中第二行第三列的值为Learning对is的注意力值。
+
+接下来我们看transformer的执行过程，同样以`Machine Learning is fun`的翻译为例，其中`<bos>`和`<eos>`为开始和结束的标识符。
+
+> 首先整句进入Encoder模块，得到Encoder处理结果`Memory`。
+>
+> 然后Encoder的结果`Memory`和Decoder的历史输出作为Decoder的输入。
+>
+> 比如首次输入为`Memory`和`<bos>`，输出第一个词的翻译结果`机`。
+>
+> 然后将输出的结果和之前的组合再次输入即输入`Memory`和`<bos> 机`，输出第二次的翻译结果`机器`。
+>
+> 然后输入`Memory`和`<bos> 机器`，输出第二次的翻译结果`机器学习`。
+>
+> Decoder会不断重复这个过程，直到翻译完成。即最后一次输输入`Memory`和`<bos> 机器学习真好玩`，输出`<eos>`。
+
+在这个过程中，我们可以看到，其实在输出`机器学习`时，它只有之前的单词`Machine`和`Learning`的注意力信息。
+
+但是我们的Encoder得到的结果是有全部的单词token之间的注意力信息的，所以为了让这个单词“学习”不能看到后面的字“真好玩”，所以要运用掩码Mask。其原因是如果让单词“学习”看到了后面的字，那么它的编码就会发生变化，相当于被剧透了，从而影响模型的预测能力。
+
+#### 方法
+
+对于Masked Multi-Head Attention，其实现方法和MHA大体上是相同的，对每个注意力头，首先都是将输入X和相权重矩阵相乘得到Q，K和V三个矩阵。然后计算 $QK^T$ 得到基础的注意力矩阵。
+
+![m1](./img/10.png)
+
+![m2](./img/11.png)
+
+接下来我们使用Mask矩阵和 $QK^T$ 按位相乘，然后进行Softmax就可以得到加了掩码的矩阵。
+
+![m3](./img/12.png)
+
+其中Mask矩阵要掩蔽的地方即这个单词和后面的单词的注意力信息的地方设置为`0`，这样在按位相乘之后需要掩蔽的地方就都为0了，即注意力值为0。但是实际过程和代码中，我们都使用的 $-\infty$ ，因为在这之后会经过一次Softmax处理，处理过后 $-\infty$ 就变成了0。
+
+之后的过程也和普通的MHA一样，将结果和Value矩阵相乘得到输出。
+
+![m4](./img/13.png)
+
 ### Decoder's Multi-Head Attention
+
+Decoder block 第二个 Multi-Head Attention 变化不大， 主要的区别在于其中 Self-Attention 的 K, V矩阵不是使用 上一个 Decoder block 的输出计算的，而是使用 Encoder 的编码信息矩阵 C 计算的。
+
+根据 Encoder 的输出 C计算得到 K, V，根据上一个 Decoder block 的输出 Z 计算 Q (如果是第一个 Decoder block 则使用输入矩阵 X 进行计算)，后续的计算方法与之前描述的一致。
+
+这样做的好处是在 Decoder 的时候，每一位单词都可以利用到 Encoder 所有单词的信息 (这些信息无需 Mask)。
 
 ***
 
@@ -189,3 +245,5 @@ $$FFN(x)=max(0,xW_1+b_1)W_2+b_2$$
 [直观解释注意力机制，Transformer的核心 | ](https://www.bilibili.com/video/BV1TZ421j7Ke/)
 
 [Drawing the Transformer Network from Scratch (Part 1)](https://towardsdatascience.com/drawing-the-transformer-network-from-scratch-part-1-9269ed9a2c5e)
+
+[层层剖析，让你彻底搞懂Self-Attention、MultiHead-Attention和Masked-Attention的机制和原理](https://blog.csdn.net/zhaohongfei_358/article/details/122861751)
