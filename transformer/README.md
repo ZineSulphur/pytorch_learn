@@ -8,6 +8,28 @@
 
 于是就想论文题目那样，作者提出了以自注意力模式为主的，没有任何卷积层和循环层的模型结构，变形金刚transformer。
 
+- [transformer](#transformer)
+  - [模型结构](#模型结构)
+  - [注意力机制](#注意力机制)
+    - [Scaled Dot-Product Attention 缩放点注意力机制](#scaled-dot-product-attention-缩放点注意力机制)
+      - [工作流程](#工作流程)
+        - [并行机制](#并行机制)
+    - [Multi-Head Attention 多头注意力机制](#multi-head-attention-多头注意力机制)
+      - [工作流程](#工作流程-1)
+  - [Embedding](#embedding)
+    - [单词 Embedding](#单词-embedding)
+    - [位置编码 Positional Encoding](#位置编码-positional-encoding)
+  - [Encoder](#encoder)
+    - [Add\&Norm](#addnorm)
+    - [Feed Forward Network](#feed-forward-network)
+  - [Decoder](#decoder)
+    - [Masked Multi-Head Attention](#masked-multi-head-attention)
+      - [原因](#原因)
+      - [方法](#方法)
+    - [Decoder's Multi-Head Attention](#decoders-multi-head-attention)
+  - [参考](#参考)
+
+
 ## 模型结构
 
 ![ts1](./img/1.png)
