@@ -146,7 +146,21 @@ $$
 
 ### Add&Norm
 
-### Feed Forward
+Add其实就是残差相加，Norm表示Layer Normalization层归一化。其公式如下：
+
+$$y=LayerNorm(x+Sublayer(x))$$
+
+其中sublayer表示MHA多头注意力层或者FFN前馈神经网络等。
+
+x+Sublayer(x)表示残差连接，通常用于解决多层网络训练的问题，可以让网络只关注当前差异的部分。
+
+Norm指Layer Normalization，通常用于RNN结构，Layer Normalization会将每一层神经元的输入都转成均值方差都一样的，这样可以加快收敛。
+
+### Feed Forward Network
+
+Feed Forward Network前馈神经网络其实就是一个两层的全连接层，第一层的激活函数为ReLU，第二层不使用激活函数。
+
+$$FFN(x)=max(0,xW_1+b_1)W_2+b_2$$
 
 ***
 
