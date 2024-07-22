@@ -37,12 +37,10 @@ encoder部分为transformer-encoder，相关的模型内容和transformer是相�
 
 位置编码是一个固定的256x25x34(d,h,w)，使其可以和之前卷积出的特征图相加。其计算公式和transformer中的相似，只是transformer中的位置编码是一维的，DETR中的位置编码是二维的，每个方向编码 $d/2=128$ 维向量。规则如下：
 
-$$
-PE_{(pos_x,2i)}=sin(\frac{pox_x}{10000^{\frac{2i}{128}}}) \\
-PE_{(pos_x,2i+1)}=cos(\frac{pox_x}{10000^{\frac{2i}{128}}}) \\
-PE_{(pos_y,2i)}=sin(\frac{pox_y}{10000^{\frac{2i}{128}}}) \\
-PE_{(pos_y,2i+1)}=cos(\frac{pox_y}{10000^{\frac{2i}{128}}})
-$$
+$$PE_{(pos_x,2i)}=sin(\frac{pox_x}{10000^{\frac{2i}{128}}})$$
+$$PE_{(pos_x,2i+1)}=cos(\frac{pox_x}{10000^{\frac{2i}{128}}})$$
+$$PE_{(pos_y,2i)}=sin(\frac{pox_y}{10000^{\frac{2i}{128}}})$$
+$$PE_{(pos_y,2i+1)}=cos(\frac{pox_y}{10000^{\frac{2i}{128}}})$$
 
 其中 $(pos_x,pos_y)$ 为图中一个位置，且 $pos_x,pos_y \in[1,HW]$ 。
 
