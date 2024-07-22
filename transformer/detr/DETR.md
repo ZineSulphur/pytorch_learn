@@ -13,7 +13,7 @@
 
 论文[End-to-End Object Detection with Transformers](https://arxiv.org/abs/2005.12872)
 
-DETR全程为Detection Transformer，如其名是一个在目标检测上运用transformer的模型。
+DETR全称为Detection Transformer，如其名是一个在目标检测上运用transformer的模型。
 
 文章所做的工作，就是将transformers运用到了object detection领域，取代了现在的模型需要手工设计的工作，并且取得了不错的结果。主要是取消NMS等后处理，和锚框等先验知识的手工过程。
 
