@@ -9,11 +9,13 @@
 * [autograd.ipynb](./autograd.ipynb) - torch.autograd相关学习笔记
 * tensor.ipynb - torch.tensor相关学习笔记
 * cnn - 卷积神经网络相关练习项目代码和学习笔记
-  * od - 目标检测相关内容
+  * [od](./cnn/od/README.md) - 目标检测简介和相关内容
     * rcnn - RCNN学习笔记和代码
       * [rcnn.md](./cnn/od/rcnn/rcnn.md)
     * yolo - YOLO学习笔记和代码
       * [yolo.md](./cnn/od/yolo/yolo.md)
 * transformer - Tranformer相关练习项目代码和学习笔记
+  * [transformer.md](./transformer/transformer.md) Transformer学习笔记和代码
+  * transformer.py transformer模型实现代码
   * detr - DETR学习笔记和代码
     * [detr.md](./transformer/detr/detr.md)
