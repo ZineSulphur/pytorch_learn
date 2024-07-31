@@ -2,6 +2,25 @@
 
 循环神经网络（Recurrent Neural Network, RNN）是一类具有内部环状连接的人工神经网络，用于处理序列数据。其最大特点是网络中存在着环，使得信息能在网络中进行循环，实现对序列信息的存储和处理。
 
+- [RNN](#rnn)
+  - [模型结构](#模型结构)
+  - [小结](#小结)
+- [Long Short-Term Memory(LSTM)](#long-short-term-memorylstm)
+  - [模型结构](#模型结构-1)
+    - [遗忘门](#遗忘门)
+    - [输入门](#输入门)
+    - [输出门](#输出门)
+  - [小结](#小结-1)
+- [Gated Recurrent Unit(GRU)](#gated-recurrent-unitgru)
+  - [模型结构](#模型结构-2)
+    - [重置门](#重置门)
+    - [更新门](#更新门)
+  - [小结](#小结-2)
+- [Encoder-Decoder](#encoder-decoder)
+  - [小结](#小结-3)
+- [参考](#参考)
+
+
 ## 模型结构
 
 ![r1](./img/rnn1.png)
