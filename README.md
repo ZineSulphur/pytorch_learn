@@ -14,6 +14,8 @@
       * [rcnn.md](./cnn/od/rcnn/rcnn.md)
     * yolo - YOLO学习笔记和代码
       * [yolo.md](./cnn/od/yolo/yolo.md)
+* rnn - 循环神经网络相关练习项目代码和学习笔记
+  * [rnn.md](./rnn/rnn.md) RNN/LSTM/GRU学习笔记
 * transformer - Tranformer相关练习项目代码和学习笔记
   * [transformer.md](./transformer/transformer.md) Transformer学习笔记和代码
   * transformer.py transformer模型实现代码
