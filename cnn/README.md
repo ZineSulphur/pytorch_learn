@@ -9,6 +9,6 @@
   * [cifar10_cnn2d.py](./cifar10_cnn2d.py) 简单的基于CIFAR10数据集的CNN网络训练代码
   * [od](./od/README.md) - 目标检测简介和相关内容
     * rcnn - RCNN学习笔记和代码
-      * [rcnn.md](./cnn/od/rcnn/rcnn.md)
+      * [rcnn.md](./od/rcnn/rcnn.md)
     * yolo - YOLO学习笔记和代码
-      * [yolo.md](./cnn/od/yolo/yolo.md)
+      * [yolo.md](./od/yolo/yolo.md)
