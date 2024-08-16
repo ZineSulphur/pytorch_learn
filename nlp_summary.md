@@ -54,6 +54,10 @@ Word Embedding有两种主流算法，Word2Vec和Glove。
 
 #### Word2Vec
 
+Word2Vec是Google开源的一款用于词向量计算的工具。可以这样理解word2vec，它是一个计算词向量的工具，也是一种语言算法模型。
+
+Word2Vec从结构上来说就是一个只有一个隐藏层的全连接网络，输入为单词的one-hot编码，输出为单词向量。
+
 ##### CBOW
 
 ##### Skip-gram
