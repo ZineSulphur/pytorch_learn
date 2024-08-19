@@ -58,6 +58,8 @@ Word Embedding有两种主流算法，Word2Vec和Glove。
 
 Word2Vec是Google开源的一款用于词向量计算的工具。可以这样理解word2vec，它是一个计算词向量的工具，也是一种语言算法模型。
 
+![word2vec](./img/word2vec.png)
+
 Word2Vec从结构上来说就是一个只有一个隐藏层的全连接网络，输入为单词的one-hot编码，输出为单词向量。
 
 ##### CBOW
@@ -80,6 +82,24 @@ CBOW模型会选择一个窗口大小，输入的单词只会是这个窗口中�
   - 不适合稀有词：CBOW对于频率较低的词的效果可能不如Skip-gram。
 
 ##### Skip-gram
+
+Skip-gram模型是Word2Vec算法中的两种模型之一，它的核心思想是使用一个词（中心词）来预测它周围的词（上下文词）。
+
+![skip-gram](./img/skip-gram.png)
+
+skip-gram的过程和CBOW相似，只不过是用一个词预测一个窗口的其它词，过程都是相似的。
+
+##### 改进 Hierachival Softmax 和 Negative Sampling
+
+Hierachival Softmax将输入到隐藏层的映射的方法由平均改为直接相加，用哈夫曼树代替原先的从隐藏层到输出层的矩阵，每个叶节点代表一个单词，从根节点到叶节点的路径为词向量。
+
+最后预测输出向量时候，大小是1*V的向量，本质上是个多分类的问题。通过hierarchical softmax的技巧，把V分类的问题变成了log(V)次二分类。
+
+![hs](./img/HierachivalSoftmax.png)
+
+在Word2Vec中，Negative Sampling模型是一种替代传统的Hierarchical Softmax的方法。它的核心思想是通过随机采样的方式，将多分类问题转化为一系列二分类问题，从而简化了计算过程。具体而言，对于给定的词w，它的上下文context(w)中的词被认为是正例，而其他词则被视为负例。然而，由于负例的数量非常庞大，我们不能直接对所有负例进行计算。因此，Negative Sampling模型通过随机采样的方式，从所有负例中选取一部分进行计算，从而降低了计算复杂度。
+
+在Negative Sampling中，每个词w都对应一个负采样集合NEG(w)。这个集合中的词是从整个词汇表中随机采样的，但采样的概率与词频相关。高频词被选中的概率较大，而低频词被选中的概率较小。这种带权采样方法确保了高频词在训练中占据更重要的地位，同时也不会忽略低频词的影响。
 
 #### GloVe
 
@@ -130,3 +150,7 @@ CBOW模型会选择一个窗口大小，输入的单词只会是这个窗口中�
 [词嵌入 | Word embedding](https://easyai.tech/ai-definition/word-embedding/#2suanfa)
 
 [Word2Vec模型之CBOW](https://www.cnblogs.com/chentiao/p/18353948)
+
+[Word2Vec原理详解](https://www.cnblogs.com/lfri/p/15032919.html)
+
+[Word Embedding中的负采样算法：深入解析Negative Sampling模型](https://developer.baidu.com/article/details/3271166)
