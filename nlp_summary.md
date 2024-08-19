@@ -103,6 +103,91 @@ Hierachival Softmax将输入到隐藏层的映射的方法由平均改为直接�
 
 #### GloVe
 
+GloVe（Global Vectors for Word Representation）算法是一种词嵌入技术，它通过全局统计语料库中的词共现信息来学习词向量。
+
+GloVe使用词共现矩阵，它统计每对词的共现频率，从而捕捉全局的语句关系。
+
+对三个句子`I like deep learning. I like NLP. I enjoy flying.`，其共现矩阵如下表：
+
+||I|like|enjoy|deep|learning|NLP|flying|.|
+|---|---|---|---|---|---|---|---|---|
+|I|0|2|1|0|0|0|0|0|
+|like|2|0|0|1|0|1|0|0|
+|enjoy|1|0|0|0|0|0|1|0|
+|deep|0|1|0|0|1|0|0|0|
+|learning|0|0|0|1|0|0|0|1|
+|NLP|0|1|0|0|0|0|0|1|
+|flying|0|0|1|0|0|0|0|1|
+|.|0|0|0|0|1|1|1|0|
+
+于是每个词就可以用矩阵中一行或者一列进行表示。
+
+但是在词汇数量多时，这个矩阵将会特别大，所以得到的词向量也特别大。并且由于矩阵比较稀疏会对训练造成困难。
+
+于是GloVe将共现矩阵和Word2Vec的优点结合起来。
+
+GloVe首先在窗口内构造共现矩阵X，然后使用共现矩阵来计算概率：
+
+$$
+P_ik = P(k|i) = \frac{X_ik}{X_i}
+$$
+
+其中X为共现矩阵，i为中心词语，k为上下文词语， $X_ik$ 为中心词和上下文共现次数， $P_ik$ 为中心词i周围出现k的概率。
+
+所以对于同一个上下文词k，不同的中心词i和j，其概率比值 $\frac{P_ik}{P_jk}$，k和i相关但是和j不相关时比值小，反之则比值大，都相关或者都不相关时接近1 。
+
+下面是ice和cream和solid和gas和water和fashion的比率。
+
+![glove1](./img/glove1.png)
+
+这么看的话，单词的词向量以及相关性和词共现的概率比率有关。所以GloVe要学习的函数就是下面的F。
+
+$$
+F(w_i,w_j,\tilde{w}_k)=\frac{P_ik}{P_jk}
+$$
+
+然后变形得到:
+
+$$
+F((w_i-w_j)^T\tilde{w}_k)=\frac{P_ik}{P_jk}
+$$
+
+由于词和上下文词在共现矩阵中是可以任意且位置也可以互相转换的，所以作者提出公式满足同态（homomorphism），得到：
+
+$$
+F((w_i-w_j)^T\tilde{w}_k)=\frac{F(w_i^T \tilde{w}_k)}{F(w_j^T \tilde{w}_k)}
+$$
+
+$$
+F(w_i^T\tilde{w}_k)=P_{ik}=\frac{X_{ik}}{X_i}
+$$
+
+于是我们不难猜出F是一种指数或者对数函数，最终作者得到下面的公式：
+
+$$
+w_i^T\tilde{w}_k+b_i+\tilde{b}_k=log(X_{ik})
+$$
+
+但是不同词语之间的值可能很大或者很小，所以目标函数中加入了权重函数 $f(X_{ij})$ ，提出了下面的目标函数：
+
+$$
+J = \sum\limits_{i,j=1}^V f(X_{ij})(w_i^T\tilde{w}_k+b_i+\tilde{b}_j - log(X_{ij}))
+$$
+
+对 $f(X_{ij})$ 需要满足：
+1. f(0)=0f(0)=0。
+2. f(x)递增，以保证罕见的组合不会给与过多的权重。
+3. 对于较大的x值，f(X)应该比较小，以保证频繁出现的组合不会给过多的权重。
+
+因此
+
+$$
+f(x)=\begin{cases}
+    (x/x_{max})^\alpha & if x \lt x_{max} \\
+    1 & otherwise
+\end{cases}
+$$
+
 ## 文本预处理
 
 ### Tokenize
@@ -154,3 +239,5 @@ Hierachival Softmax将输入到隐藏层的映射的方法由平均改为直接�
 [Word2Vec原理详解](https://www.cnblogs.com/lfri/p/15032919.html)
 
 [Word Embedding中的负采样算法：深入解析Negative Sampling模型](https://developer.baidu.com/article/details/3271166)
+
+[GloVe算法原理及简单使用](https://zhuanlan.zhihu.com/p/50946044)
