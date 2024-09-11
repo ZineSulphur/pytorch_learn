@@ -4,6 +4,48 @@
 
 本项目主要使用python和jupyter notebook和pytorch相关技术。
 
+## 知识点集合
+
+* NN 神经网络 DL 深度学习
+  * 核心内容
+    * 梯度下降
+    * 反向回归
+    * 自动微分
+    * 损失函数
+    * 优化器（梯度下降的方法）
+  * MLP 全连接神经网络
+    * 激活函数
+  * CNN 卷积神经网络
+    * 卷积层
+    * 池化层
+    * AlexNet
+    * 残差网络
+  * RNN 循环神经网络
+    * LSTM
+    * GRU
+    * Seq2Seq RNN
+    * 双向RNN
+  * Transformer
+    * 注意力机制
+    * Encoder-Decoder
+    * GPT
+    * Bert
+  * 运用
+    * CV 计算机视觉
+      * OD 目标识别
+        * YOLO(CNN)
+        * R-CNN(CNN)
+        * DETR(Tranformer)
+    * NLP 自然语音处理
+      * 文本表示
+        * 词向量
+        * 独热编码
+        * Word2Vec
+        * Embbeding
+        * Tokenize
+      * RNN相关
+      * Tranformer以及LLM相关
+
 ## 文件
 * [nn.ipynb](./nn.ipynb) - torch.nn相关学习笔记，包含卷积层，池化层，激活函数，归一化，线性层，损失函数等内容
 * [autograd.ipynb](./autograd.ipynb) - torch.autograd相关学习笔记
